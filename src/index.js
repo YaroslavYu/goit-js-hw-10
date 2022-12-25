@@ -1,4 +1,5 @@
 import './css/styles.css';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 const debounce = require('lodash.debounce');
 
 const DEBOUNCE_DELAY = 300;
@@ -10,20 +11,28 @@ const listCountryInfo = document.querySelector('.country-list');
 listCountryInfo.style.listStyle = 'none';
 listCountryInfo.style.paddingLeft = '0';
 
-inputNameCountry.addEventListener('input', onInputCountryName);
+inputNameCountry.addEventListener(
+  'input',
+  debounce(onInputCountryName, DEBOUNCE_DELAY)
+);
 
 function fetchCountries(name) {
   //   const sanitiseName = name.trim();
   return fetch(
     `https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags,languages`
-  ).then(r => {
-    return r.json();
-  });
-  // .catch(err => console.log(err));
+  )
+    .then(r => {
+      console.log(r);
+      if (r.status === 404) {
+        console.log(r.status);
+        throw new Error();
+      } else return r.json();
+    })
+    .catch(Notify.failure('Qui timide rogat docet negare'));
 }
 
 function onInputCountryName(e) {
-  const name = e.currentTarget.value.trim();
+  const name = e.target.value.trim();
   if (!name) {
     oneCountryInfo.innerHTML = '';
     listCountryInfo.innerHTML = '';
@@ -46,7 +55,8 @@ function onInputCountryName(e) {
 }
 
 function eee(e) {
-  debounce(onInputCountryName(e), 1000);
+  // debounce(onInputCountryName(e), 1000);
+  console.log('hello');
 }
 
 // ?fields=name,capital,population,flags,languages
@@ -77,3 +87,6 @@ function markupOneCountryDetail(countryInfo) {
     <div><b>Languages: </b><span>${languages}</span></div>`;
   oneCountryInfo.innerHTML = markupCountry;
 }
+
+// Notify.failure('Qui timide rogat docet negare');
+// Notify.info('Cogito ergo sum');
